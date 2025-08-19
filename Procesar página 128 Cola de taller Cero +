@@ -1,0 +1,58 @@
+--Procesar página 128 Cola de taller Cero +
+declare
+  var_estado_pedido char(1);
+  var_fecha_estado VARCHAR2(20);
+BEGIN
+  var_fecha_estado:=convert_timezone_fecha( p_input_date=>(SYSDATE),
+        p_source_timezone => '-04:00',
+        p_target_timezone => '+02:00');
+
+  var_fecha_estado:=var_fecha_estado||' '||convert_timezone( p_input_date   => SYSDATE,/*sysdate,*/
+        p_source_timezone => '-04:00',
+        p_target_timezone => '+01:00');
+
+  SELECT ESTADO_VERIFICADO INTO var_estado_pedido
+  FROM COLA_TALLER_CERO
+  where cola_taller_cero_id=:P128_COLA_TALLER_CERO_ID;
+
+  if var_estado_pedido='N' OR var_estado_pedido IS NULL then
+      var_estado_pedido:='S';
+
+      update COLA_TALLER_CERO
+       set estado_verificado=var_estado_pedido,
+           FECHA_ESTADO_verificado=var_fecha_estado,
+           usuario_estado_verificado=:APP_USER,
+           ESTADO_SIN_HACER='S'
+       where cola_taller_cero_id=:P128_COLA_TALLER_CERO_ID;
+   
+       insert into cola_taller_cero_HISTORIAL_ESTADOS(cola_taller_cero_id,estado,fecha_CAMBIO,usuario)
+       values(:P128_COLA_TALLER_CERO_ID,VAR_ESTADO_PEDIDO,VAR_FECHA_ESTADO,:APP_USER);
+
+       --Pasar a Cola de Preparación.
+       insert into COLA_DE_PREPARACION(FECHA,PEDIDO,DESCRIPCION,BULTOS,AGENCIA,EMPRESA_ID,ESTADO,
+                                    PRIORIDAD_ID,CANTIDAD,CODIGO_SERVICIO,codigo_barras,comentario)
+       values(sysdate,:P128_PEDIDO,:P128_DESCRIPCION,:P128_BULTOS,:P128_AGENCIA,:P128_EMPRESA_ID,/*:P128_ESTADO*/581,
+                                    :P128_PRIORIDAD_ID,:P128_CANTIDAD,:P128_CODIGO_SERVICIO,:P128_CODIGO_BARRA,:P128_COMENTARIO);
+
+       commit;
+
+       APEX_APPLICATION.G_PRINT_SUCCESS_MESSAGE:='Líneas del Pedido enviados a COLA DE PREPARACION.'; 
+  else
+    --htp.p('No se puede sacar un pedido de Cola de preparación.');
+    :P128_MENSAJE_VERIFICADO:='No se puede sacar un pedido de Cola de preparación.';
+  end if;
+
+  /*if var_estado_pedido!='S' OR var_estado_pedido IS NULL then
+    
+
+    --Pasar a Cola de Preparación.
+    if var_estado_pedido='S'/*:ESTADO=581	*//*PREPARADO 581  THEN
+       
+    END IF;
+    :P128_MENSAJE_VERIFICADO:=NULL;
+    commit;
+  else
+    --htp.p('No se puede sacar un pedido de Cola de preparación.');
+    :P128_MENSAJE_VERIFICADO:='No se puede sacar un pedido de Cola de preparación.';
+  end if;*/
+END;
