@@ -1,0 +1,85 @@
+/*Page 128: Cola de Taller Cero +*/
+
+declare
+  var_sql clob;
+begin
+  var_sql:='select ROWNUM,COLA_TALLER_CERO_ID,
+       FECHA,
+       PEDIDO,
+       /*COLA_TALLER_CERO.*/DESCRIPCION,
+       /*COLA_TALLER_CERO.*/BULTOS,
+       AGENCIA,
+       /*COLA_TALLER_CERO.*/ESTADO,
+       
+       case estadO_EN_CRUDO 
+         when ''S'' then ''<img src="#APP_FILES#EN CRUDO (PULSADO).png"  width="75px;" height="75px;" <span class="estado-en-crudo"></span>'' 
+         else ''<img src="#APP_FILES#EN CRUDO (SIN PULSAR).png" width="75px;" height="75px;"<span class="estado-en-crudo"></span>''
+       end EN_CRUDO,
+
+       case estadO_PEDIDO_MA 
+         when ''S'' then ''<img src="#APP_FILES#ENVIADO A M.A.    (pulsado).png"  width="75px;" height="75px;" <span class="estado-pedido-ma"></span>''
+         else ''<img src="#APP_FILES#ENVIADO A M.A.    (SIN PULSAR).png" width="75px;" height="75px;"<span class="estado-pedido-ma"></span>''
+       end PEDIDO_MA,
+
+       case estadO_verificado
+         when ''S'' then ''<img src="#APP_FILES#verificado (pulsado).png"  width="75px;" height="75px;" <span class="estado-verificado"></span>'' 
+         else ''<img src="#APP_FILES#verificado (no pulsado).png" width="75px;" height="75px;"<span class="estado-verificado"></span>'' 
+       end VERIFICADO,usuario_estado_verificado,/*TO_CHAR(fecha_estado_verificado, ''DD-MON-YYYY HH24:MI:SS'')*/fecha_estado_verificado,
+
+       case estadO_SIN_HACER
+         when ''N'' then ''<img src="#APP_FILES#SIN HACER.png"  width="75px;" height="75px;" <span class="estado-sin-hacer"></span>'' 
+         else '''' 
+       end SIN_HACER,
+       
+       case  
+         when estadO_TALLER_CERO IS NULL then ''<img src="#APP_FILES#taller 0 (sin pulsar).png"  width="75px;" height="75px;" <span class="estado-taller-cero"></span>'' 
+         else ''<img src="#APP_FILES#taller 0 (pulsado).png" width="75px;" height="75px;"<span class="estado-taller-cero"></span>'' 
+       end TALLER_CERO,ESTADO_TALLER_CERO,USUARIO_TALLER_CERO,/*TO_CHAR(FECHA_TALLER_cERO, ''DD-MON-YYYY HH24:MI:SS'')*/FECHA_TALLER_cERO,
+       
+       case  
+         when estadO_REPASADO =''S'' then ''<img src="#APP_FILES#repasado (pulsado).png"  width="75px;" height="75px;" <span class="estado-repasado"></span>'' 
+         else ''<img src="#APP_FILES#repasado (sin pulsar).png" width="75px;" height="75px;"<span class="estado-repasado"></span>'' 
+       end REPASADO,ESTADO_REPASADO,USUARIO_ESTADO_REPASADO,/*TO_CHAR(FECHA_ESTADO_REPASADO, ''DD-MON-YYYY HH24:MI:SS'')*/FECHA_ESTADO_REPASADO,
+       
+       case  
+         when estadO_RECHAZADO =''S'' then ''<img src="#APP_FILES#RECHAZADO (SIN PULSAR).png"  width="75px;" height="75px;" <span class="estado-rechazado"></span>'' 
+         else ''<img src="#APP_FILES#RECHAZADO (PULSADO).png" width="75px;" height="75px;"<span class="estado-rechazado"></span>'' 
+       end RECHAZADO,ESTADO_RECHAZADO,USUARIO_ESTADO_RECHAZADO,/*TO_CHAR(FECHA_ESTADO_RECHAZADO, ''DD-MON-YYYY HH24:MI:SS'')*/FECHA_ESTADO_RECHAZADO,
+
+       case   
+       when estado_pintado =''S'' then ''<img src="#APP_FILES#pintado (pulsado).png"  width="75px;" height="75px;" <span class="estado-pintado"></span>'' 
+         else ''<img src="#APP_FILES#pintado (sin pulsar).png" width="75px;" height="75px;"<span class="estado-pintado"></span>'' 
+       end PINTADO,ESTADO_PINTADO,USUARIO_ESTADO_PINTADO,/*TO_CHAR(FECHA_ESTADO_PINTADO, ''DD-MON-YYYY HH24:MI:SS'')*/FECHA_ESTADO_PINTADO,
+
+       estadO_PEDIDO_MA,usuario_estado_pedido_ma,/*TO_CHAR(fecha_estado_pedido_ma, ''DD-MON-YYYY HH24:MI:SS'')*//*:SSxFF*/ fecha_estado_pedido_ma,
+       ESTADO_EN_CRUDO,USUARIO_ESTADO_ENCRUDO,
+       /*TO_CHAR(FECHA_ESTADO_ENCRUDO, ''DD-MON-YYYY HH24:MI:SS'')*/FECHA_ESTADO_ENCRUDO,
+       
+       
+       COMENTARIO,
+       EMPRESA_ID,
+       PRIORIDAD_ID,
+       ESTADO_PAGO,
+       SERVICIO_ARTICULO_ID,
+       /*COLA_TALLER_CERO.*/CANTIDAD,
+       /*COLA_TALLER_CERO.*/ENVIO_RESP_XML,
+       ETIQU_RESP_XML,
+       ALBARAN_NUMERO,
+       CODIGO_SEGUIMIENTO,
+       URL_ETIQUETA_DESCARGAR,
+       CODIGO_SERVICIO,
+       ETIQUETA_RESP_ENVIO_BORRADO_XML,
+       /*COLA_TALLER_CERO.*/ARTICULO_ID,
+       /*COLA_TALLER_CERO.*/CODIGO_BARRAS,
+       FECHA_COMPROMISO,
+       sys.dbms_lob.getlength(FOTO) as FOTO
+    from GEST_COLA_TALLER_CERO_2024_VIEW ';
+
+    IF :P128_FILTRAR_POR_VALIDADO='V' then
+       var_sql:=var_sql||' where /*empresa_id=:P44_EMPRESA and estado_verificado IS NULL or*/ estado=''581'' /*or estado_verificado !=''S''*/';
+    ELSE       
+       var_sql:=var_sql||' where /*empresa_id=:P44_EMPRESA and estado_verificado IS NULL or*/ estado!=TO_NUMBER(''581'')/*!=''S'' */' ;
+    END IF;
+    var_sql:=var_sql||' order by FECHA_COMPROMISO asc';
+    return var_sql;
+ end;
